@@ -1,0 +1,63 @@
+
+import java.io.IOException;
+import java.util.HashSet;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+
+public class test3 {
+	public static class Map extends Mapper<LongWritable, Text, Text, Text>{
+		static HashSet<String> a=new HashSet<String>();
+		static HashSet<String> b=new HashSet<String>();
+		protected void map(LongWritable key, Text value,Context context)
+				throws IOException, InterruptedException {
+			// TODO Auto-generated method stub
+			String line =value.toString();
+			String str = line.split("\t")[0];
+			String strr=line.split("\t")[1].substring(0, 2);
+			if(strr.equals("01")){
+			   a.add(str);
+			}
+			if(strr.equals("02")){b.add(str);}
+			
+		
+		}
+		@Override
+		protected void cleanup(Context context)
+				throws IOException, InterruptedException {
+
+			// TODO Auto-generated method stub
+			int sum = 0 ;
+            for (String string : a) {
+				if(b.contains(string)){
+				sum ++;
+				}
+			}	
+            String s =Integer.toString(sum);
+            context.write(new Text("equals ip "),new Text(s) );
+		}
+	}
+	public static void main(String [] args ) throws IOException, ClassNotFoundException, InterruptedException{
+		Configuration conf=new Configuration();
+		Job job=Job.getInstance(conf,"sum : ip not equels");
+		job.setJarByClass(test3.class);
+		job.setMapperClass(Map.class);
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(Text.class);
+		job.setNumReduceTasks(1);
+		//String path="D:/tmp/ip_time,D:/tmp/ip_time_2";
+		String path="/qst/licong/text/ip_time,/qst/licong/text/ip_time_2";
+		FileInputFormat.addInputPaths(job, path);
+		FileOutputFormat.setOutputPath(job, new Path(args[0]));
+		job.waitForCompletion(true);
+	    System.out.println("执行完毕");
+	  
+	}
+}
