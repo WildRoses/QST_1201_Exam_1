@@ -1,3 +1,4 @@
+//433254 MB-seconds, 24 vcore-seconds
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
